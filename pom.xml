@@ -1,3 +1,4 @@
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -8,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <cogcompNlpVersion>3.0.87</cogcompNlpVersion>
+        <cogcompNlpVersion>3.1.31</cogcompNlpVersion>
     </properties>
     <repositories>
         <repository>
@@ -51,6 +52,21 @@
         </dependency>
         <dependency>
             <groupId>edu.illinois.cs.cogcomp</groupId>
+            <artifactId>illinois-curator</artifactId>
+            <version>${cogcompNlpVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.illinois.cs.cogcomp</groupId>
+            <artifactId>illinois-pos</artifactId>
+            <version>${cogcompNlpVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.illinois.cs.cogcomp</groupId>
+            <artifactId>illinois-md</artifactId>
+            <version>${cogcompNlpVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>illinois-xlwikifier-resources</artifactId>
             <version>1.0.13</version>
         </dependency>
@@ -84,6 +100,17 @@
             <groupId>edu.illinois.cs.cogcomp</groupId>
             <artifactId>illinois-ner</artifactId>
             <version>${cogcompNlpVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>3.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>3.7.0</version>
+            <classifier>models</classifier>
         </dependency>
     </dependencies>
 

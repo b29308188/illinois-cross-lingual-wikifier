@@ -265,6 +265,12 @@ public class TACDataReader {
                 .filter(x -> x.noun_type.equals("NAM"))
                 .collect(Collectors.toList());
     }
+    public List<ELMention> read2016ChineseEvalGoldNOM(){
+        return readGoldMentions(ConfigParameters.tac2016_eval_golds).stream()
+                .filter(x -> x.getLanguage().equals("CMN"))
+                .filter(x -> x.noun_type.equals("NOM"))
+                .collect(Collectors.toList());
+    }
 
     public List<ELMention> read2015EnglishEvalGoldNAM(){
         return readGoldMentions(ConfigParameters.tac2015_eval_golds).stream()
@@ -367,18 +373,20 @@ public class TACDataReader {
 
         List<QueryDocument> docs = null;
         try {
-            docs = reader.read2016EnglishEvalDocs();
-//            docs = reader.read2016ChineseEvalDocs();
-//            docs = reader.read2016SpanishEvalDocs();
+//            docs = reader.read2016EnglishEvalDocs();
+             docs = reader.read2016ChineseEvalDocs();
+            // docs = reader.read2016SpanishEvalDocs();
         } catch (IOException e) {
             e.printStackTrace();
         }
 //        List<ELMention> golds = reader.read2016ChineseEvalGoldNAM();
-        List<ELMention> golds = reader.read2016EnglishEvalGoldNAM();
-//        List<ELMention> golds = reader.read2016EnglishEvalGoldNOM();
-
+          //List<ELMention> golds = reader.read2016EnglishEvalGoldNAM();
+        // List<ELMention> golds = reader.read2016EnglishEvalGoldNOM();
+//        List<ELMention> golds = reader.read2016SpanishEvalGoldNOM();
+        List<ELMention> golds = reader.read2016ChineseEvalGoldNOM();
         String outdir = "/shared/preprocessed/ctsai12/multilingual/xlwikifier-data/ner-data/zh/tac2016.eval/";
-        outdir = "/shared/corpora/ner/tac/en/2016.nam";
+        // outdir = "/shared/corpora/ner/tac/en/2016.nam";
+        outdir = "/shared/preprocessed/lchen112/nom-data/es/tac2016.all";
         for(QueryDocument doc: docs)
             doc.mentions = golds.stream().filter(x -> doc.getDocID().startsWith(x.getDocID())).collect(Collectors.toList());
 

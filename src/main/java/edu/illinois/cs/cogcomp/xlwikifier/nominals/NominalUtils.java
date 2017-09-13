@@ -1,4 +1,4 @@
-package edu.illinois.cs.cogcomp.xlwikifier;
+package edu.illinois.cs.cogcomp.xlwikifier.nominals;
 
 import edu.illinois.cs.cogcomp.annotation.AnnotatorException;
 import edu.illinois.cs.cogcomp.annotation.AnnotatorService;
@@ -18,14 +18,14 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NominalHandler {
+public class NominalUtils {
 
-    private final Logger logger = LoggerFactory.getLogger(NominalHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(NominalUtils.class);
     private final AnnotatorService curatorAnnotator;
     private final POSAnnotator posannotator;
     private final MentionAnnotator mentionAnnotator;
 
-    public NominalHandler() throws Exception {
+    public NominalUtils() throws Exception {
         curatorAnnotator = CuratorFactory.buildCuratorClient();
         posannotator = new POSAnnotator();
         mentionAnnotator = new MentionAnnotator("ERE_type");

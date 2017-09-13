@@ -30,7 +30,7 @@ public class NominalDetectorTrainer {
 
     private static final Logger logger = LoggerFactory.getLogger(NominalDetectorTrainer.class);
 
-    private static int iteration = 50;
+    private static int iteration = 100;
 
     public static void trainModel(String trainDir, String testDir, String config){
 
@@ -59,9 +59,15 @@ public class NominalDetectorTrainer {
     }
 
     public static void main(String[] args) {
-        String trainDir = "/shared/preprocessed/lchen112/nom-data/en/tac2016.train";
-        String testDir = "/shared/preprocessed/lchen112/nom-data/en/tac2016.test";
-        String config = "config/nom/en.tac2016.config";
+        // String lang = "en";
+        // String lang = "es";
+         String lang = "zh";
+        // String trainDir = String.format("/shared/preprocessed/lchen112/nom-data/%s/tac2016.train", lang);
+        // String testDir = String.format("/shared/preprocessed/lchen112/nom-data/%s/tac2016.test", lang);
+        String trainDir = String.format("/shared/preprocessed/lchen112/nom-data/%s/tac2016.all", lang);
+        String testDir = String.format("/shared/preprocessed/lchen112/nom-data/%s/tac2016.all", lang);
+        String config = String.format("config/nom/%s.tac2016.config", lang);
+        //String config = String.format("config/nom/%s.tac2016.emb.config", lang);
         trainModel(trainDir, testDir, config);
     }
 }

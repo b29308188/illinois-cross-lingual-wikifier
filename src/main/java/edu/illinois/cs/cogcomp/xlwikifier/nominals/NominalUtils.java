@@ -35,6 +35,10 @@ public class NominalUtils {
         return !(xEnd < yStart || yEnd < xStart);
     }
 
+    public void annoateCorefSimple(QueryDocument doc) {
+        System.out.println("Not implemented");
+    }
+
     public void annotateCoref(QueryDocument doc) throws AnnotatorException {
 
         TextAnnotation ta = doc.getTextAnnotation();

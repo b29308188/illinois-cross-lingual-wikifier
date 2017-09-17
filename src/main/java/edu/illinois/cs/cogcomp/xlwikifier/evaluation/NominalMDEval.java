@@ -22,7 +22,7 @@ public class NominalMDEval {
     private static Logger logger = LoggerFactory.getLogger(NominalMDEval.class);
     private static String[] TYPES = {"FAC", "GPE", "LOC", "ORG", "PER"};
 
-    public static void evalauteTAC(String pathToTacDir, String configFile, String lang) throws Exception{
+    public static void evalauteTAC(String pathToTacDir, String lang, NominalDetector nd) throws Exception{
 
         File folder = new File(pathToTacDir);
         Set<String> testDocs = new HashSet<String>();
@@ -61,24 +61,28 @@ public class NominalMDEval {
         Arrays.stream(TYPES).forEach(t -> outputsPerType.put(t, 0.0));
         Map<String, Double> outputsPerTypeThatMentionHit = new HashMap<>();
         Arrays.stream(TYPES).forEach(t -> outputsPerTypeThatMentionHit.put(t, 0.0));
-        NominalDetector nd = new NominalDetector(configFile);
+
         for (QueryDocument doc : docs) {
 
             nd.annotate(doc);
             TACUtils.setXmlOffsets(doc);
 
             List<ELMention> doc_golds = golds.stream().filter(g -> g.getDocID().equals(doc.getDocID())).collect(Collectors.toList());
+
+            // prevent duplicate hits (key: startOffset:endOffset)
+            Map<String, ELMention> nonHitGolds= new HashMap<>();
+            doc_golds.stream().forEach(m -> nonHitGolds.put(m.getStartOffset()+":"+m.getEndOffset(), m));
+
             for (ELMention m : doc.mentions){
-                for (ELMention gold_m : doc_golds) {
-                    if (m.getStartOffset() == gold_m.getStartOffset() && m.getEndOffset() == gold_m.getEndOffset()) {
+                if (nonHitGolds.containsKey(m.getStartOffset()+":"+m.getEndOffset())) {
+                        ELMention gold_m = nonHitGolds.get(m.getStartOffset()+":"+m.getEndOffset());
                         mentionHit += 1;
                         outputsPerTypeThatMentionHit.put(m.getType(),outputsPerTypeThatMentionHit.get(m.getType())+1);
                         if (m.getType().equals(gold_m.getType())) {
                             mentionTypeHit += 1;
                             hitsPerType.put(m.getType(),hitsPerType.get(m.getType())+1);
                         }
-                        break;
-                    }
+                        nonHitGolds.remove(m.getStartOffset()+":"+m.getEndOffset());
                 }
                 outputsPerType.put(m.getType(),outputsPerType.get(m.getType())+1);
                 totalOutput += 1;
@@ -109,12 +113,21 @@ public class NominalMDEval {
 
     }
     public static void main(String[] args) throws Exception {
-        // String lang = "en";
-        // String lang = "es";
-        String lang = "zh";
-        String testDir = String.format("/shared/preprocessed/lchen112/nom-data/%s/tac2016.test", lang);
-        String configFile = String.format("config/nom/%s.tac2016.config", lang);
+        String lang;
+
+        // lang = "en";
+        // lang = "es";
+        lang = "zh";
+
         ConfigParameters.setPropValues("config/xlwikifier-tac.config");
-        evalauteTAC(testDir, configFile, lang);
+        String configFile = String.format("config/nom/%s.tac2016.config", lang);
+        // String configFile = String.format("config/nom/%s.exp.config", lang);
+        String dictFile = String.format("/shared/preprocessed/lchen112/nom-data/%s/dict.tac.2016.train", lang);
+        NominalDetector nd = new NominalDetector(configFile, dictFile, lang);
+        // NominalDetector nd = new NominalDetector(configFile);
+
+        String testDir = String.format("/shared/preprocessed/lchen112/nom-data/%s/tac2016.test", lang);
+
+        // evalauteTAC(testDir, lang, nd);
     }
 }

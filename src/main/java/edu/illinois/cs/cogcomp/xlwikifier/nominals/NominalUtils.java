@@ -7,93 +7,112 @@ import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Constituent;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.Relation;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.TextAnnotation;
 import edu.illinois.cs.cogcomp.core.datastructures.textannotation.View;
-import edu.illinois.cs.cogcomp.curator.CuratorFactory;
-import edu.illinois.cs.cogcomp.pos.POSAnnotator;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import org.cogcomp.md.MentionAnnotator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NominalUtils {
 
     private final Logger logger = LoggerFactory.getLogger(NominalUtils.class);
-    private final AnnotatorService curatorAnnotator;
-    private final POSAnnotator posannotator;
-    private final MentionAnnotator mentionAnnotator;
+    /**
+     * Add nominals into named entity clusters
+     * @param nams
+     * @param noms
+     * @return
+     */
+    public static void annotateCoref(QueryDocument doc){
 
-    public NominalUtils() throws Exception {
-        curatorAnnotator = CuratorFactory.buildCuratorClient();
-        posannotator = new POSAnnotator();
-        mentionAnnotator = new MentionAnnotator("ERE_type");
-    }
+        boolean use_window = true;
+        boolean remove = true;
+        int window = 300;
+        int nil = 999999999;
+        List<ELMention> newm = new ArrayList<>();
 
-    public boolean isOffsetOverlapped(int xStart, int xEnd, int yStart, int yEnd) {
-        return !(xEnd < yStart || yEnd < xStart);
-    }
-
-    public void annoateCorefSimple(QueryDocument doc) {
-        System.out.println("Not implemented");
-    }
-
-    public void annotateCoref(QueryDocument doc) throws AnnotatorException {
-
-        TextAnnotation ta = doc.getTextAnnotation();
-
-        ta.addView(posannotator);
-        mentionAnnotator.addView(ta);
-        View mentionView = ta.getView(ViewNames.MENTION);
-        List<Constituent> mentions = mentionView.getConstituents();
-        mentions = mentions
-                .stream()
-                .filter(
-                        x -> x.getAttribute("EntityMentionType").equals("NOM")
-                                && ( x.getAttribute("EntityType").equals("GPE")
-                                ||  x.getAttribute("EntityType").equals("ORG")
-                                ||  x.getAttribute("EntityType").equals("PER")
-                                ||  x.getAttribute("EntityType").equals("LOC")
-                                ||  x.getAttribute("EntityType").equals("FAC")
-                        )
-                )
+        List<ELMention> nes = doc.mentions.stream()
+                .filter(m -> m.getNounType().equals("NAM"))
+                .sorted(Comparator.comparingInt(ELMention::getStartOffset))
                 .collect(Collectors.toList());
-        for (Constituent extent : mentions){
-            //Get the head if needed
-            Constituent head = MentionAnnotator.getHeadConstituent(extent, "MENTION_HEAD");
-            ELMention m = new ELMention(
-                    doc.getDocID(),
-                    head.getStartCharOffset(),
-                    head.getEndCharOffset()
-            );
-            m.setSurface(head.getSurfaceForm());
-            m.setNounType("NOM");
-            doc.mentions.add(m);
+        List<ELMention> nos = doc.mentions.stream()
+                .filter(m -> m.getNounType().equals("NOM"))
+                .sorted(Comparator.comparingInt(ELMention::getStartOffset))
+                .collect(Collectors.toList());
+
+        for(ELMention no: nos){
+            boolean over = false;
+            for(ELMention ne: nes){
+                if((no.getStartOffset() >= ne.getStartOffset() && no.getStartOffset() <= ne.getEndOffset())
+                        || (no.getEndOffset() >= ne.getStartOffset() && no.getEndOffset() <= ne.getEndOffset())) {
+                    over = true;
+                    break;
+                }
+            }
+            if(!over)
+                nes.add(no);
         }
 
-        curatorAnnotator.addView(ta, ViewNames.COREF);
-        for (Relation r : ta.getView(ViewNames.COREF).getRelations()) {
-            ELMention sourceMention = null;
-            ELMention targetMention = null;
-            Constituent source = r.getSource();
-            Constituent target = r.getTarget();
-            for (ELMention m : doc.mentions) {
-                if (isOffsetOverlapped(source.getStartCharOffset(), source.getEndCharOffset(), m.getStartOffset(), m.getEndOffset())) {
-                    sourceMention = m;
+        nes = nes.stream().sorted(Comparator.comparingInt(ELMention::getStartOffset)).collect(Collectors.toList());
+
+        for(int i = 0; i < nes.size(); i++) {
+            ELMention m = nes.get(i);
+            if (!m.noun_type.equals("NOM")) continue;
+            m.setMid("NIL");
+            ELMention prev_nam = null, prev_nom = null;
+            for (int j = i - 1; j >= 0; j--) {
+                ELMention pm = nes.get(j);
+                if (pm == null) continue;
+                if (prev_nam == null && pm.noun_type.equals("NAM") && pm.getType().equals(m.getType())) {
+                    if (!use_window || m.getStartOffset() - pm.getEndOffset() < window)
+                        prev_nam = pm;
                 }
-                if (isOffsetOverlapped(target.getStartCharOffset(), target.getEndCharOffset(), m.getStartOffset(), m.getEndOffset())) {
-                    targetMention = m;
+                if (prev_nom == null && pm.noun_type.equals("NOM") && pm.getType().equals(m.getType())
+                        && pm.getSurface().toLowerCase().equals(m.getSurface().toLowerCase())) {
+                    if (!use_window || m.getStartOffset() - pm.getEndOffset() < window) {
+                        prev_nom = pm;
+                    }
                 }
             }
-            if (sourceMention != null && targetMention != null && sourceMention != targetMention) {
-                if (sourceMention.getEnWikiTitle().equals("NIL") && !targetMention.getEnWikiTitle().equals("NIL") && sourceMention.getNounType().equals("NOM")) {
-                    sourceMention.setEnWikiTitle(targetMention.getEnWikiTitle());
+
+            ELMention next_nam = null;
+            for(int j = i+1; j<nes.size(); j++){
+                ELMention pm = nes.get(j);
+                if (next_nam == null && pm.noun_type.equals("NAM") && pm.getType().equals(m.getType())) {
+                    if (!use_window || m.getStartOffset() - pm.getEndOffset() < window)
+                        next_nam = pm;
                 }
-                if (!sourceMention.getEnWikiTitle().equals("NIL") && targetMention.getEnWikiTitle().equals("NIL") && targetMention.getNounType().equals("NOM")) {
-                    targetMention.setEnWikiTitle(sourceMention.getEnWikiTitle());
+            }
+
+            ELMention closest = prev_nam;
+            if(next_nam != null){
+                if(closest == null || next_nam.getStartOffset() - m.getEndOffset() < m.getStartOffset() - prev_nam.getEndOffset())
+                    closest = next_nam;
+            }
+
+            if(closest != null){
+                m.setMid(closest.getMid());
+                // don't know why 0.9, just feel not confident with nominals
+                m.confidence = closest.confidence*0.9;
+            } else {
+                if (remove) {
+                    nes.set(i, null);
+                } else {
+                    m.setMid("NIL" + nil);
+                    nil--;
                 }
             }
         }
+
+        for(ELMention m: nes){
+            if(m != null)
+                newm.add(m);
+        }
+
+        doc.mentions.addAll(newm);
     }
 }

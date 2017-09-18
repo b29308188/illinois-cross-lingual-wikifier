@@ -134,19 +134,24 @@ public class EREReader {
     }
 
     public static void main(String[] args) {
-        String ere_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2016E31_DEFT_Rich_ERE_English_Training_Annotation_R3/data/ere";
-        String src_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2016E31_DEFT_Rich_ERE_English_Training_Annotation_R3/data/source";
-        src_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E68_DEFT_Rich_ERE_English_Training_Annotation_R2_V2/data/source";
-        ere_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E68_DEFT_Rich_ERE_English_Training_Annotation_R2_V2/data/ere";
-        src_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E29_DEFT_Rich_ERE_English_Training_Annotation_V2/data/source/cmptxt";
-        ere_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E29_DEFT_Rich_ERE_English_Training_Annotation_V2/data/ere/cmptxt";
-        ere_dir = "/shared/corpora/corporaWeb/tac/2016/ere-all/es-test/ere";
-        src_dir = "/shared/corpora/corporaWeb/tac/2016/ere-all/es-test/source";
-        String lang = "es";
+        // String ere_dir = "/shared/corpora/corporaWeb/deft/chi/LDC2016E31_DEFT_Rich_ERE_English_Training_Annotation_R3/data/ere";
+        // String src_dir = "/shared/corpora/corporaWeb/deft/chi/LDC2016E31_DEFT_Rich_ERE_English_Training_Annotation_R3/data/source";
+        // String ere_dir = "/shared/corpora/corporaWeb/deft/chi/LDC2015E112_DEFT_Rich_ERE_Chinese_Training_Annotation_R2/data/ere";
+        // String src_dir = "/shared/corpora/corporaWeb/deft/chi/LDC2015E112_DEFT_Rich_ERE_Chinese_Training_Annotation_R2/data/source";
 
-        List<QueryDocument> docs = EREReader.read(src_dir, ere_dir, lang);
+        String ere_dir = "/shared/corpora/corporaWeb/deft/spa/LDC2016E34_DEFT_Rich_ERE_Spanish_Annotation_R2/data/ere";
+        String src_dir = "/shared/corpora/corporaWeb/deft/spa/LDC2016E34_DEFT_Rich_ERE_Spanish_Annotation_R2/data/source";
 
-        String out_dir = "/shared/corpora/ner/nominal_exp/es.ere.NOM.spe";
+
+        // src_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E68_DEFT_Rich_ERE_English_Training_Annotation_R2_V2/data/source";
+        // ere_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E68_DEFT_Rich_ERE_English_Training_Annotation_R2_V2/data/ere";
+        // src_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E29_DEFT_Rich_ERE_English_Training_Annotation_V2/data/source/cmptxt";
+        // ere_dir = "/shared/corpora/corporaWeb/deft/eng/LDC2015E29_DEFT_Rich_ERE_English_Training_Annotation_V2/data/ere/cmptxt";
+        //ere_dir = "/shared/corpora/corporaWeb/tac/2016/ere-all/es-test/ere";
+        // src_dir = "/shared/corpora/corporaWeb/tac/2016/ere-all/es-test/source";
+
+        List<QueryDocument> docs = EREReader.read(src_dir, ere_dir, "es");
+        String out_dir = "/shared/preprocessed/lchen112/nom-data/es/ere";
 
         TACDataReader.writeCoNLLFormat(docs, docs.stream().flatMap(x -> x.mentions.stream()).collect(Collectors.toList()), out_dir);
 

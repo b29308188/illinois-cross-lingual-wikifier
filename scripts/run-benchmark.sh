@@ -16,5 +16,8 @@ LANG=$1
 CONFIG=$2
 
 CP="./target/dependency/*:./target/classes/"
-java -ea -Xmx90g -cp $CP edu.illinois.cs.cogcomp.xlwikifier.evaluation.TAC2016Eval $LANG $CONFIG
+
+ENCODING="-Dfile.encoding=UTF-8"
+
+java -ea -Xmx90g -cp $CP $ENCODING edu.illinois.cs.cogcomp.xlwikifier.evaluation.TAC2016Eval $LANG $CONFIG
 

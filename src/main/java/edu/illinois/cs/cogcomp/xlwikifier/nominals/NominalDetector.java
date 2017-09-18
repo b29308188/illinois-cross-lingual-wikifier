@@ -7,7 +7,6 @@ import edu.illinois.cs.cogcomp.ner.NERAnnotator;
 import edu.illinois.cs.cogcomp.tokenizers.MultiLingualTokenizer;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.evaluation.NominalMDEval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

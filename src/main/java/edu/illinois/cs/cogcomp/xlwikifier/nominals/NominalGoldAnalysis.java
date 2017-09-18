@@ -71,10 +71,30 @@ public class NominalGoldAnalysis {
     }
 
     public void NOMLinkToNAM() {
-        int CorefableCnt = 0;
-        int CorefableNILCnt = 0;
+        int corefableCnt = 0;
+        int corefableNILCnt = 0;
         int nonCorefableCnt = 0;
         int nonCorefableNILCnt = 0;
+
+        int corefableCntDF = 0;
+        int corefableNILCntDF = 0;
+        int nonCorefableCntDF = 0;
+        int nonCorefableNILCntDF = 0;
+        String pDF = null;
+        if (lang.equals("en")) {
+            pDF = "ENG_DF_";
+        }
+        else if (lang.equals("es")) {
+            pDF = "SPA_DF_";
+        }
+        else if (lang.equals("zh")) {
+            pDF = "CMN_DF_";
+        }
+        else {
+            logger.error("Unknown language: " + lang);
+        }
+        final String prefixDF = pDF;
+
         for (QueryDocument doc : docs) {
             Map<String, List<ELMention>> docNAMGolds = NAMGolds.stream()
                     .filter(m -> m.getDocID().equals(doc.getDocID()))
@@ -88,8 +108,8 @@ public class NominalGoldAnalysis {
             List<ELMention> nonCorefables = docNOMGolds.stream()
                     .filter(m -> !docNAMGolds.containsKey(m.getGoldMid()))
                     .collect(Collectors.toList());
-            CorefableCnt += corefables.size();
-            CorefableNILCnt += corefables.stream()
+            corefableCnt += corefables.size();
+            corefableNILCnt += corefables.stream()
                     .filter(m -> m.getGoldMid().startsWith("NIL"))
                     .collect(Collectors.counting());
             nonCorefableCnt += nonCorefables.size();
@@ -97,10 +117,27 @@ public class NominalGoldAnalysis {
                     .filter(m -> m.getGoldMid().startsWith("NIL"))
                     .collect(Collectors.counting());
 
+            corefableCntDF += corefables.stream().filter(m -> m.getDocID().startsWith(prefixDF)).collect(Collectors.counting());
+            corefableNILCntDF += corefables.stream()
+                    .filter(m -> m.getDocID().startsWith(prefixDF) && m.getGoldMid().startsWith("NIL"))
+                    .collect(Collectors.counting());
+            nonCorefableCntDF += nonCorefables.stream().filter(m -> m.getDocID().startsWith(prefixDF)).collect(Collectors.counting());
+            nonCorefableNILCntDF += nonCorefables.stream()
+                    .filter(m -> m.getDocID().startsWith(prefixDF) && m.getGoldMid().startsWith("NIL"))
+                    .collect(Collectors.counting());
+
         }
-        System.out.println("Nominals that coref to  name entities within the document: ");
-        System.out.printf("(Corefable) #moninals = %d(%f%%), #NILs = %d\n", CorefableCnt, (double) CorefableCnt / NOMGolds.size() * 100, CorefableNILCnt);
-        System.out.printf("(Non-corefable) #moninals = %d(%f%%), #NILs = %d\n",nonCorefableCnt, (double)nonCorefableCnt / NOMGolds.size() * 100, nonCorefableNILCnt);
+        System.out.println("Nominals that coref to name entities within the document: ");
+        System.out.printf("(Corefable) #nominals = %d(%f%%), #NILs = %d, #nonNILs = %d\n", corefableCnt, (double) corefableCnt / NOMGolds.size() * 100, corefableNILCnt, corefableCnt - corefableNILCnt);
+        System.out.printf("(Non-corefable) #nominals = %d(%f%%), #NILs = %d, #nonNILs = %d\n",nonCorefableCnt, (double)nonCorefableCnt / NOMGolds.size() * 100, nonCorefableNILCnt, nonCorefableCnt - nonCorefableNILCnt);
+
+        System.out.println("***Discussion Format***");
+        System.out.printf("(Corefable) #nominals = %d, #NILs = %d, #nonNILs = %d\n", corefableCntDF,  corefableNILCntDF, corefableCntDF - corefableNILCntDF);
+        System.out.printf("(Non-corefable) #nominals = %d, #NILs = %d, #nonNILs = %d\n",nonCorefableCntDF,  nonCorefableNILCntDF, nonCorefableCntDF - nonCorefableNILCntDF);
+
+        System.out.println("***Non-discussion Format***");
+        System.out.printf("(Corefable) #nominals = %d, #NILs = %d, #nonNILs = %d\n", corefableCnt - corefableCntDF, corefableNILCnt - corefableNILCntDF, corefableCnt - corefableCntDF - (corefableNILCnt - corefableNILCntDF));
+        System.out.printf("(Non-corefable) #nominals = %d, #NILs = %d, #nonNILs = %d\n",nonCorefableCnt - nonCorefableCntDF,  nonCorefableNILCnt - nonCorefableNILCntDF, nonCorefableCnt - nonCorefableCntDF - (nonCorefableNILCnt - nonCorefableNILCntDF));
     }
 
     public void typeCounts() {
@@ -113,13 +150,13 @@ public class NominalGoldAnalysis {
     }
 
     public static void main (String[] args) throws Exception {
-        // String lang = "en";
+         String lang = "en";
         // String lang = "es";
-         String lang = "zh";
+        // String lang = "zh";
         NominalGoldAnalysis analysis = new NominalGoldAnalysis(lang);
         System.out.printf("language = %s, #nominals = %d\n", lang, analysis.NOMGolds.size());
         // analysis.simpleCounts();
-        // analysis.NOMLinkToNAM();
-        analysis.typeCounts();
+        analysis.NOMLinkToNAM();
+        // analysis.typeCounts();
     }
 }

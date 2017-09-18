@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
  * Created by lchen112 on 9/12/17.
  */
 
-public class NominalMDEval {
-    private static Logger logger = LoggerFactory.getLogger(NominalMDEval.class);
+public class TAC2016NominalMDEval {
+    private static Logger logger = LoggerFactory.getLogger(TAC2016NominalMDEval.class);
     private static String[] TYPES = {"FAC", "GPE", "LOC", "ORG", "PER"};
 
     public static void evalauteTAC(String pathToTacDir, String lang, NominalDetector nd) throws Exception{
@@ -128,6 +128,6 @@ public class NominalMDEval {
 
         String testDir = String.format("/shared/preprocessed/lchen112/nom-data/%s/tac2016.test", lang);
 
-        // evalauteTAC(testDir, lang, nd);
+        evalauteTAC(testDir, lang, nd);
     }
 }

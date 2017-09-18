@@ -3,18 +3,13 @@ package edu.illinois.cs.cogcomp.xlwikifier.nominals;
 import edu.illinois.cs.cogcomp.xlwikifier.ConfigParameters;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.ELMention;
 import edu.illinois.cs.cogcomp.xlwikifier.datastructures.QueryDocument;
-import edu.illinois.cs.cogcomp.xlwikifier.evaluation.NominalMDEval;
-import edu.illinois.cs.cogcomp.xlwikifier.evaluation.TACDataReader;
-import edu.illinois.cs.cogcomp.xlwikifier.evaluation.TACUtils;
 import edu.illinois.cs.cogcomp.xlwikifier.wikipedia.WikiDocReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class NominalDictGenerator {
     private static Logger logger = LoggerFactory.getLogger(NominalDictGenerator.class);

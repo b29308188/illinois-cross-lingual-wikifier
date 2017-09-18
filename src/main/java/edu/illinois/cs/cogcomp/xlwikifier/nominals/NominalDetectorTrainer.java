@@ -60,8 +60,8 @@ public class NominalDetectorTrainer {
 
     public static void main(String[] args) {
         // String lang = "en";
-        // String lang = "es";
-        String lang = "zh";
+        String lang = "es";
+        // String lang = "zh";
         // String trainDir = String.format("/shared/preprocessed/lchen112/nom-data/%s/ere+tac2016train", lang);
         // String testDir = String.format("/shared/preprocessed/lchen112/nom-data/%s/tac2016.test", lang);
         String trainDir = String.format("/shared/preprocessed/lchen112/nom-data/%s/tac2016.train", lang);
